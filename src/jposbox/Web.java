@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import static java.lang.System.out;
@@ -29,6 +30,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -350,17 +352,29 @@ public class Web {
                 he.getResponseHeaders().set("Content-Type", "application/json");
                 he.getResponseHeaders().set("Access-Control-Allow-Methods", "POST");
                 he.getResponseHeaders().set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Debug-Mode");
-                Map<String, Object> parameters = new HashMap<String, Object>();
+//                Map<String, Object> parameters = new HashMap<String, Object>();                
                 InputStreamReader isr = new InputStreamReader(he.getRequestBody(), "UTF-8");
                 BufferedReader br = new BufferedReader(isr);
-                String text = br.readLine();
+                String text = br.readLine();                
                 String id = "";
                 String document = "raw";
                 if (text != null) { // Si nos manda vacio saltamos
-                    out.println("Received " + text);
-                    id = text.substring(text.length() - 9, text.length() - 1);
-                    out.println("ID" + id);
-                    String raw_html = text.substring(text.indexOf("<html"), text.indexOf("</html>") + 10);
+                    PrintWriter out = new PrintWriter("print_raw_data.txt");
+                    out.print(text);
+                    System.out.println(text);
+                    JSONObject request = new JSONObject(text);
+                    try {
+                        id = request.getBigInteger("id").toString();
+                    } catch (JSONException er) {
+                        // Just continue
+                    }
+//                    out.println("Received 100 first chars: " + text.substring(0, 100));
+//                    id = text.substring(text.length() - 9, text.length() - 1);
+//                    out.println("id" + id);
+//                    String raw_html = text.substring(text.indexOf("<html"), text.indexOf("</html>") + 10);
+//                    String raw_html = text.substring(0, text.length() - 10);
+//                  Va a buscar el contenido en receipt
+                    String raw_html = request.getJSONObject("params").getString("receipt");
                     raw_html = raw_html.replace("\\n", "");
                     raw_html = raw_html.replace("\\\"", "\"");
                     PosPrinter P = new PosPrinter();
@@ -371,7 +385,7 @@ public class Web {
                 he.sendResponseHeaders(200, response.length());
                 OutputStream os = he.getResponseBody();
                 out.print("Response:" + response);
-                os.write(response.toString().getBytes());
+                os.write(response.getBytes());
                 os.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
