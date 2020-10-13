@@ -367,13 +367,8 @@ public class Web {
                         id = request.getBigInteger("id").toString();
                     } catch (JSONException er) {
                         // Just continue
+                        System.err.print(er);
                     }
-//                    out.println("Received 100 first chars: " + text.substring(0, 100));
-//                    id = text.substring(text.length() - 9, text.length() - 1);
-//                    out.println("id" + id);
-//                    String raw_html = text.substring(text.indexOf("<html"), text.indexOf("</html>") + 10);
-//                    String raw_html = text.substring(0, text.length() - 10);
-//                  Va a buscar el contenido en receipt
                     String raw_html = request.getJSONObject("params").getString("receipt");
                     raw_html = raw_html.replace("\\n", "");
                     raw_html = raw_html.replace("\\\"", "\"");
